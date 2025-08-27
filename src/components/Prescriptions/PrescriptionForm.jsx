@@ -1,14 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../../contexts/AuthContext'
 import { generatePrescription } from '../../utils/pdfGenerator'
-import { 
-  Button, 
-  TextField, 
-  Box, 
-  Typography, 
-  Alert,
-  CircularProgress
-} from '@mui/material'
+import { FileText, User, Save, Download, AlertCircle } from 'lucide-react'
 
 export default function PrescriptionForm({ onNewPrescription }) {
   const { user } = useAuth()
@@ -53,53 +46,106 @@ export default function PrescriptionForm({ onNewPrescription }) {
   }
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        📝 Nova Prescrição Médica
-      </Typography>
+    <div className="p-6">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+          <FileText className="w-5 h-5 text-primary" />
+        </div>
+        <h2 className="text-xl font-semibold text-neutral-800">Nova Prescrição</h2>
+      </div>
       
-      <TextField
-        label="Nome do Paciente"
-        fullWidth
-        margin="normal"
-        error={!!errors.patientName}
-        helperText={errors.patientName?.message}
-        {...register('patientName', { 
-          required: 'Campo obrigatório',
-          validate: value => value.trim().length >= 3 || 'Mínimo 3 caracteres'
-        })}
-      />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-medium text-neutral-700 flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Nome do Paciente
+            </span>
+          </label>
+          <input
+            type="text"
+            className={`input input-bordered w-full bg-neutral-50 border-neutral-200 focus:border-primary focus:bg-white transition-all duration-200 ${
+              errors.patientName ? 'border-red-500 focus:border-red-500' : ''
+            }`}
+            placeholder="Digite o nome completo do paciente"
+            {...register('patientName', { 
+              required: 'Campo obrigatório',
+              validate: value => value.trim().length >= 3 || 'Mínimo 3 caracteres'
+            })}
+          />
+          {errors.patientName && (
+            <label className="label">
+              <span className="label-text-alt text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.patientName.message}
+              </span>
+            </label>
+          )}
+        </div>
+        
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-medium text-neutral-700 flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Prescrição Médica
+            </span>
+          </label>
+          <textarea
+            className={`textarea textarea-bordered w-full h-32 bg-neutral-50 border-neutral-200 focus:border-primary focus:bg-white transition-all duration-200 resize-none ${
+              errors.prescriptionContent ? 'border-red-500 focus:border-red-500' : ''
+            }`}
+            placeholder="Digite a prescrição completa com medicamentos, dosagens e instruções..."
+            {...register('prescriptionContent', { 
+              required: 'Campo obrigatório',
+              validate: value => value.trim().length >= 10 || 'Mínimo 10 caracteres'
+            })}
+          />
+          {errors.prescriptionContent && (
+            <label className="label">
+              <span className="label-text-alt text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.prescriptionContent.message}
+              </span>
+            </label>
+          )}
+        <button 
+          type="submit" 
+          className="btn w-full bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 border-none text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center gap-2">
+              <div className="loading loading-spinner loading-sm"></div>
+              Processando...
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Save className="w-5 h-5" />
+              <Download className="w-5 h-5" />
+              Salvar e Gerar PDF
+            </div>
+          )}
+        </button>
+        </div>
+        {errors.root && (
+          <div className="alert alert-error">
+            <AlertCircle className="w-5 h-5" />
+            <span>{errors.root.message}</span>
+          </div>
+        )}
+      </form>
       
-      <TextField
-        label="Prescrição Completa"
-        multiline
-        rows={6}
-        fullWidth
-        margin="normal"
-        error={!!errors.prescriptionContent}
-        helperText={errors.prescriptionContent?.message}
-        {...register('prescriptionContent', { 
-          required: 'Campo obrigatório',
-          validate: value => value.trim().length >= 10 || 'Mínimo 10 caracteres'
-        })}
-      />
-
-      <Button 
-        type="submit" 
-        variant="contained" 
-        disabled={isSubmitting}
-        sx={{ mt: 3 }}
-      >
-        {isSubmitting ? (
-          <CircularProgress size={24} sx={{ color: 'white' }} />
-        ) : '💾 Salvar e Gerar PDF'}
-      </Button>
-
-      {errors.root && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {errors.root.message}
-        </Alert>
-      )}
-    </Box>
+      <div className="mt-6 p-4 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl">
+        <h3 className="font-medium text-neutral-800 mb-2 flex items-center gap-2">
+          <FileText className="w-4 h-4 text-primary" />
+          Informações Importantes
+        </h3>
+        <ul className="text-sm text-neutral-600 space-y-1">
+          <li>• A prescrição será salva automaticamente no sistema</li>
+          <li>• Um PDF será gerado com QR Code para verificação</li>
+          <li>• Todas as prescrições ficam registradas no histórico</li>
+        </ul>
+      </div>
+    </div>
   )
 }
