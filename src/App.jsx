@@ -6,6 +6,7 @@ import ProtectedRoute from './components/Layout/ProtectedRoute'
 
 const Login = lazy(() => import('./pages/Login'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
+const NovaPrescricao = lazy(() => import('./pages/NovaPrescricao'))
 const PrescriptionVerification = lazy(() => import('./pages/PrescriptionVerification'))
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
             {/* Rotas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/nova-prescricao" element={<NovaPrescricao />} />
             </Route>
 
             <Route path="*" element={<h1>404 - Página não encontrada</h1>} />

@@ -27,9 +27,15 @@ export default function Login() {
   return (
   <div className="relative h-screen w-full flex items-center justify-center font-sans"> 
    {/* Card verde central */}
-    <div className="relative w-full max-w-md bg-[#0F5E45] rounded-lg shadow-lg p-8">
-    {/* <div className="relative w-full max-w-md bg-[#57C59B] rounded-lg shadow-lg p-8">
-    <div className="relative w-full max-w-md bg-[#58C59D] rounded-lg shadow-lg p-8">       
+       <div 
+          className="relative w-full max-w-md rounded-lg shadow-lg p-8"
+          style={{
+          background: "linear-gradient(346deg, rgba(87,197,155,1) 20%, rgba(119,220,159,1) 47%, rgba(15,94,69,1) 100%)"
+  }}
+       >
+    {/* <div className="relative w-full max-w-md bg-[#0F5E45] rounded-lg shadow-lg p-8"> */}
+    {/* <div className="relative w-full max-w-md bg-[#57C59B] rounded-lg shadow-lg p-8"> */}
+    {/* <div className="relative w-full max-w-md bg-[#58C59D] rounded-lg shadow-lg p-8">       
     <div className="relative w-full max-w-md bg-[#58C59E] rounded-lg shadow-lg p-8">        */}
        
    
@@ -100,7 +106,7 @@ export default function Login() {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="text-sm font-medium btn w-50 rounded-full bg-white text-[#0F5E45] border-none hover:bg-[#3cca9d] hover:text-white transition"
+              className="text-sm font-medium btn h-6 w-50 rounded-full bg-white text-[#0F5E45] border-none hover:bg-[#0F5E45] hover:text-white transition"
               disabled={loading}
             >
               {loading ? (
@@ -114,9 +120,9 @@ export default function Login() {
 
         {/* Link para signup */}
         <div className="text-center mt-6">
-          <p className="text-white/90 font-light">
+          <p className="text-white/90 font-medium">
             Não tem uma conta?{' '}
-            <Link to="/signup" className="link text-white hover:text-gray-200">
+            <Link to="/signup" className="link text-[#0F5E45] hover:text-gray-200 font-medium">
               Criar uma conta
             </Link>
           </p>
