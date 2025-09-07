@@ -28,16 +28,11 @@ export default function Login() {
   <div className="relative h-screen w-full flex items-center justify-center font-sans"> 
    {/* Card verde central */}
        <div 
-          className="relative w-full max-w-md rounded-lg shadow-lg p-8"
+          className="relative w-full max-w-md rounded-3xl shadow-lg p-8"
           style={{
-          background: "linear-gradient(346deg, rgba(87,197,155,1) 20%, rgba(119,220,159,1) 47%, rgba(15,94,69,1) 100%)"
-  }}
+          background: "linear-gradient(166deg, rgba(87,197,155,1) 20%, rgba(119,220,159,1) 47%, rgba(15,94,69,1) 100%)"
+          }}
        >
-    {/* <div className="relative w-full max-w-md bg-[#0F5E45] rounded-lg shadow-lg p-8"> */}
-    {/* <div className="relative w-full max-w-md bg-[#57C59B] rounded-lg shadow-lg p-8"> */}
-    {/* <div className="relative w-full max-w-md bg-[#58C59D] rounded-lg shadow-lg p-8">       
-    <div className="relative w-full max-w-md bg-[#58C59E] rounded-lg shadow-lg p-8">        */}
-       
    
 
        {/* Logo */}
@@ -119,14 +114,14 @@ export default function Login() {
         </form>
 
         {/* Link para signup */}
-        <div className="text-center mt-6">
+        {/* <div className="text-center mt-6">
           <p className="text-white/90 font-medium">
             Não tem uma conta?{' '}
             <Link to="/signup" className="link text-[#0F5E45] hover:text-gray-200 font-medium">
               Criar uma conta
             </Link>
           </p>
-        </div>
+        </div> */}
       </div>
 
       {/* Texto institucional fora do card */}

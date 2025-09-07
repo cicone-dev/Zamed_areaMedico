@@ -1,9 +1,8 @@
 import { useAuth } from '../contexts/AuthContext'
-import { useNavigate, Link, Outlet } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import {
   Home,
   FilePlus,
-  History,
   FileText,
   LogOut,
   UserCircle,
