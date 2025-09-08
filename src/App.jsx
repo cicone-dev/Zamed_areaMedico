@@ -8,6 +8,7 @@ const Login = lazy(() => import('./pages/Login'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const NovaPrescricao = lazy(() => import('./pages/NovaPrescricao'))
 const PrescriptionVerification = lazy(() => import('./pages/PrescriptionVerification'))
+const NovaConsulta = lazy(() => import('./pages/NovaConsulta'))
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
             {/* Rotas protegidas */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/nova-consulta" element={<NovaConsulta />} />
               <Route path="/nova-prescricao" element={<NovaPrescricao />} />
             </Route>
 
