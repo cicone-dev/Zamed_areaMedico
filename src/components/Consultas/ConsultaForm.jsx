@@ -7,7 +7,12 @@ import {
   Alert,
   CircularProgress,
   Card,
-  CardContent
+  CardContent,
+  FormControl,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio
 } from '@mui/material'
 import {  useState } from 'react'
 
@@ -46,6 +51,7 @@ export default function ConsultaForm({ onNewConsulta }) {
           paciente: formData.paciente.trim(),
           data: formData.data,
           hora: formData.hora,
+          situacao: formData.situacao, 
           motivo: formData.motivo.trim()
         })
       })
@@ -130,6 +136,26 @@ export default function ConsultaForm({ onNewConsulta }) {
           helperText={errors.hora?.message}
           {...register('hora', { required: 'Campo obrigatório' })}
         />
+ {/* Radio Buttons para situação */}
+        <FormControl
+          component="fieldset"
+          margin="normal"
+          error={!!errors.situacao}
+          sx={{ mt: 2 }}
+        >
+          <FormLabel component="legend">Situação da Consulta</FormLabel>
+          <RadioGroup row {...register('situacao', { required: 'Campo obrigatório' })}>
+            <FormControlLabel value="Bem" control={<Radio />} label="Bem" />
+            <FormControlLabel value="Médio" control={<Radio />} label="Médio" />
+            <FormControlLabel value="Sério" control={<Radio />} label="Sério" />
+          </RadioGroup>
+          {errors.situacao && (
+            <Typography variant="caption" color="error">
+              {errors.situacao.message}
+            </Typography>
+          )}
+        </FormControl>
+
 
         <TextField
           label="Motivo da Consulta"

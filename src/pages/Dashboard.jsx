@@ -17,12 +17,11 @@ import { useEffect, useState } from 'react'
 export default function Dashboard() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [nextConsulta, setNextConsulta] = useState(null)
+  const [consultas, setConsultas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [horaAtual, setHoraAtual] = useState(new Date())
 
-  // Buscar consultas e encontrar a próxima
   useEffect(() => {
     const fetchConsultas = async () => {
       try {
@@ -31,30 +30,16 @@ export default function Dashboard() {
         const data = await res.json()
         if (!Array.isArray(data)) throw new Error('Formato inválido das consultas')
 
-        const agora = new Date()
-
-      const proximas = data
-        .map(c => {
-          // Garante que data e hora existam
+        // Converte data + hora em Date real
+        const consultasProcessadas = data.map(c => {
           const [hora, min] = c.hora?.split(':').map(Number) || [0, 0]
           const [ano, mes, dia] = c.data?.split('-').map(Number) || [0, 0, 0]
           return { ...c, datetime: new Date(ano, mes - 1, dia, hora, min) }
         })
-        // Inclui consultas futuras e consultas de hoje (mesmo se hora já passou)
-        .filter(c => {
-          const d = c.datetime
-          return (
-            d.getFullYear() > agora.getFullYear() ||
-            (d.getFullYear() === agora.getFullYear() &&
-              (d.getMonth() > agora.getMonth() ||
-                (d.getMonth() === agora.getMonth() &&
-                 d.getDate() >= agora.getDate())))
-          )
-        })
-        .sort((a, b) => a.datetime - b.datetime)
 
-        setNextConsulta(proximas.length > 0 ? proximas[0] : null)
-        
+        setConsultas(
+          consultasProcessadas.sort((a, b) => a.datetime - b.datetime)
+        )
       } catch (err) {
         console.error('[Dashboard] Erro ao buscar consultas:', err)
         setError(err.message)
@@ -65,34 +50,22 @@ export default function Dashboard() {
 
     fetchConsultas()
     const interval = setInterval(() => setHoraAtual(new Date()), 1000)
-
     return () => clearInterval(interval)
   }, [])
 
-// Array com os dias da semana
+  // Array com os dias da semana
   const diasSemana = [
-    "Domingo",
-    "Segunda-feira",
-    "Terça-feira",
-    "Quarta-feira",
-    "Quinta-feira",
-    "Sexta-feira",
-    "Sábado",
-  ];
-
-  // Pega o dia da semana atual
-  const diaSemana = diasSemana[horaAtual.getDay()];
-
+    "Domingo","Segunda-feira","Terça-feira","Quarta-feira",
+    "Quinta-feira","Sexta-feira","Sábado",
+  ]
+  const diaSemana = diasSemana[horaAtual.getDay()]
 
   // Saudação dinâmica
-const hora = horaAtual.getHours();
-let saudacao;
-
-if (hora >= 6 && hora < 12) saudacao = 'Bom dia';
-else if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
-else saudacao = 'Boa noite';
-
-
+  const hora = horaAtual.getHours()
+  let saudacao
+  if (hora >= 6 && hora < 12) saudacao = 'Bom dia'
+  else if (hora >= 12 && hora < 18) saudacao = 'Boa tarde'
+  else saudacao = 'Boa noite'
 
   const handleLogout = () => {
     logout()
@@ -104,7 +77,6 @@ else saudacao = 'Boa noite';
 
       {/* Sidebar fixa */}
       <aside className="w-72 bg-[#0F5E45] text-white flex flex-col justify-between fixed h-screen shadow-lg animate-slide-in-left">
-        {/* Logo */}
         <div>
           <div className="flex flex-col items-center justify-center py-8 border-b border-white/20">
             <img src="/logo_zamed.png" alt="ZaMed Logo" className="w-auto h-30 object-contain" />
@@ -143,17 +115,16 @@ else saudacao = 'Boa noite';
         <header className="flex items-center justify-between bg-white shadow px-6 py-4 animate-fade-in">
           <div>
             <h1 className="text-2xl font-semibold text-gray-700">
-              {saudacao}, {'Dr'} {user?.name || 'Usuário'}
+              {saudacao}, Dr {user?.name || 'Usuário'}
             </h1>     
-            <p className="flex font-semibold  text-gray-400">
-              {diaSemana}
-            </p>
-            <p className="flex font-semibold  text-gray-400">
-              {horaAtual.toLocaleDateString('pt-BR')} |<Clock className="text-green-700 ml-1 h-auto w-3.5 mt-0.5 "/> 
-             <p className='text-green-700'>{horaAtual.toLocaleTimeString('pt-BR')}</p>
+            <p className="flex font-semibold text-gray-400">{diaSemana}</p>
+            <p className="flex items-center font-semibold text-gray-400">
+              {horaAtual.toLocaleDateString('pt-BR')} | 
+              <Clock className="text-green-700 ml-1 h-4 w-4" /> 
+              <span className="text-green-700 ml-1">{horaAtual.toLocaleTimeString('pt-BR')}</span>
             </p>
           </div>
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
             <UserCircle className="h-9 w-9 text-gray-600" />
             <div className="text-right">
               <p className="text-gray-800 font-medium">{user?.name}</p>
@@ -166,74 +137,40 @@ else saudacao = 'Boa noite';
         <section className="flex-1 p-8 overflow-y-auto bg-gradient-to-b from-gray-50 to-white animate-fade-in">
 
           {loading ? (
-            <p className="text-gray-500">Carregando dados...</p>
+            <p className="text-gray-500">Carregando consultas...</p>
           ) : error ? (
             <p className="text-red-500">Erro: {error}</p>
-          ) : nextConsulta ? (
+          ) : consultas.length > 0 ? (
             <>
-              {/* Cards principais */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <h2 className="text-xl font-bold text-gray-700 mb-6">Últimas Consultas</h2>
 
-                {/* Situação */}
-                <div className="bg-white p-6 rounded-lg shadow flex items-center gap-3">
-                  <Activity className="h-8 w-8 text-[#0F5E45]" />
-                  <div>
-                    <p className="text-gray-500">Situação do Paciente</p>
-                    <h2 className={`text-3xl font-bold ${
-                      nextConsulta.situacao === 'Sério' ? 'text-red-600' :
-                      nextConsulta.situacao === 'Médio' ? 'text-yellow-600' :
-                      'text-green-600'
-                    }`}>
-                      {nextConsulta.situacao}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Data */}
-                <div className="bg-white p-6 rounded-lg shadow flex items-center gap-3">
-                  <Calendar className="h-8 w-8 text-[#0F5E45]" />
-                  <div>
-                    <p className="text-gray-500">Data da Consulta</p>
-                    <h2 className="text-3xl font-bold text-gray-800">
-                      {new Date(nextConsulta.data).toLocaleDateString('pt-BR')}
-                    </h2>
-                  </div>
-                </div>
-
-                {/* Hora */}
-                <div className="bg-white p-6 rounded-lg shadow flex items-center gap-3">
-                  <Clock className="h-8 w-8 text-[#0F5E45]" />
-                  <div>
-                    <p className="text-gray-500">Hora da Consulta</p>
-                    <h2 className="text-3xl font-bold text-gray-800">{nextConsulta.hora}</h2>
-                  </div>
-                </div>
-              </div>
-
-              {/* Blocos com informações adicionais */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                {/* Nome do Paciente */}
-                <div className="bg-white p-6 rounded-lg shadow animate-slide-in-up">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <ClipboardList className="h-5 w-5 text-[#0F5E45]" /> Paciente
-                  </h3>
-                  <p className="text-xl font-bold text-gray-800">{nextConsulta.paciente}</p>
-                </div>
-
-                {/* CPF e E-mail */}
-                <div className="bg-white p-6 rounded-lg shadow animate-slide-in-up">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">Informações de Contato</h3>
-                  <p className="text-gray-700"><span className="font-medium">CPF:</span> {nextConsulta.cpf || 'Não informado'}</p>
-                  <p className="text-gray-700"><span className="font-medium">E-mail:</span> {nextConsulta.email || 'Não informado'}</p>
-                </div>
-
-              </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {consultas.slice(0, 3).map((consulta, idx) => (
+        <div key={idx} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-1">
+          <div className="flex items-center gap-3 mb-4">
+            <Activity className="h-6 w-6 text-[#0F5E45]" />
+            <h3 className="text-lg font-semibold text-gray-700">{consulta.paciente}</h3>
+          </div>
+          <p className="text-gray-600"><span className="font-medium">Situação:</span> 
+            <span className={`ml-1 ${
+              consulta.situacao === 'Sério' ? 'text-red-600 font-bold' :
+              consulta.situacao === 'Médio' ? 'text-yellow-600 font-bold' :
+              'text-green-600 font-bold'
+            }`}>
+              {consulta.situacao}
+            </span>
+          </p>
+          <p className="text-gray-600"><Calendar className="inline h-4 w-4 mr-1 text-[#0F5E45]" /> {new Date(consulta.data).toLocaleDateString('pt-BR')}</p>
+          <p className="text-gray-600"><Clock className="inline h-4 w-4 mr-1 text-[#0F5E45]" /> {consulta.hora}</p>
+          <p className="text-gray-600"><ClipboardList className="inline h-4 w-4 mr-1 text-[#0F5E45]" /> CPF: {consulta.cpf || 'Não informado'}</p>
+          <p className="text-gray-600">E-mail: {consulta.email || 'Não informado'}</p>
+        </div>
+      ))}
+    </div>
             </>
           ) : (
-            <p className="text-gray-500">Nenhuma consulta futura encontrada.</p>
+            <p className="text-gray-500">Nenhuma consulta encontrada.</p>
           )}
-
           {/* Estatísticas e informações extras */}
           <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
 
