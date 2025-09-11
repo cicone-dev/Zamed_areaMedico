@@ -1,4 +1,17 @@
+import {RefreshCw } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+ 
 export default function Footer() {
+    const [ultimaSync, setUltimaSync] = useState(null)
+ // Simular fetch
+  useEffect(() => {
+
+    setUltimaSync(new Date())
+  }, [])
+
+
+
   return (
     <footer className="bg-[#0F5E45] text-white py-8">
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -50,7 +63,15 @@ export default function Footer() {
             © {new Date().getFullYear()} ZaMed — Todos os direitos reservados
           </p>
         </div>
-        <p className="text-xs opacity-70">Versão do Sistema: 1.0.0</p>
+            {/* Última sincronização */}
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-6 w-6 text-white" />
+              <span className="text-white-400 text-sm">
+                {ultimaSync
+                  ? `Ultima sincronização: ${ultimaSync.toLocaleDateString('pt-BR')} às ${ultimaSync.toLocaleTimeString('pt-BR')}`
+                  : '---'}
+              </span>
+            </div>      
       </div>
     </footer>
   )

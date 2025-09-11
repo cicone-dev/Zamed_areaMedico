@@ -20,11 +20,7 @@ export default function Dashboard() {
   const [nextConsulta, setNextConsulta] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
+  const [horaAtual, setHoraAtual] = useState(new Date())
 
   // Buscar consultas e encontrar a próxima
   useEffect(() => {
@@ -36,12 +32,29 @@ export default function Dashboard() {
         if (!Array.isArray(data)) throw new Error('Formato inválido das consultas')
 
         const agora = new Date()
-        const proximas = data
-          .map(c => ({ ...c, datetime: new Date(`${c.data}T${c.hora}`) }))
-          .filter(c => c.datetime >= agora)
-          .sort((a, b) => a.datetime - b.datetime)
+
+      const proximas = data
+        .map(c => {
+          // Garante que data e hora existam
+          const [hora, min] = c.hora?.split(':').map(Number) || [0, 0]
+          const [ano, mes, dia] = c.data?.split('-').map(Number) || [0, 0, 0]
+          return { ...c, datetime: new Date(ano, mes - 1, dia, hora, min) }
+        })
+        // Inclui consultas futuras e consultas de hoje (mesmo se hora já passou)
+        .filter(c => {
+          const d = c.datetime
+          return (
+            d.getFullYear() > agora.getFullYear() ||
+            (d.getFullYear() === agora.getFullYear() &&
+              (d.getMonth() > agora.getMonth() ||
+                (d.getMonth() === agora.getMonth() &&
+                 d.getDate() >= agora.getDate())))
+          )
+        })
+        .sort((a, b) => a.datetime - b.datetime)
 
         setNextConsulta(proximas.length > 0 ? proximas[0] : null)
+        
       } catch (err) {
         console.error('[Dashboard] Erro ao buscar consultas:', err)
         setError(err.message)
@@ -51,7 +64,40 @@ export default function Dashboard() {
     }
 
     fetchConsultas()
+    const interval = setInterval(() => setHoraAtual(new Date()), 1000)
+
+    return () => clearInterval(interval)
   }, [])
+
+// Array com os dias da semana
+  const diasSemana = [
+    "Domingo",
+    "Segunda-feira",
+    "Terça-feira",
+    "Quarta-feira",
+    "Quinta-feira",
+    "Sexta-feira",
+    "Sábado",
+  ];
+
+  // Pega o dia da semana atual
+  const diaSemana = diasSemana[horaAtual.getDay()];
+
+
+  // Saudação dinâmica
+const hora = horaAtual.getHours();
+let saudacao;
+
+if (hora >= 6 && hora < 12) saudacao = 'Bom dia';
+else if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
+else saudacao = 'Boa noite';
+
+
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans">
@@ -95,8 +141,19 @@ export default function Dashboard() {
 
         {/* Header */}
         <header className="flex items-center justify-between bg-white shadow px-6 py-4 animate-fade-in">
-          <h1 className="text-2xl font-semibold text-gray-700">Bem-vindo, Dr. {user?.name || 'Usuário'}</h1>
-          <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-700">
+              {saudacao}, {'Dr'} {user?.name || 'Usuário'}
+            </h1>     
+            <p className="flex font-semibold  text-gray-400">
+              {diaSemana}
+            </p>
+            <p className="flex font-semibold  text-gray-400">
+              {horaAtual.toLocaleDateString('pt-BR')} |<Clock className="text-green-700 ml-1 h-auto w-3.5 mt-0.5 "/> 
+             <p className='text-green-700'>{horaAtual.toLocaleTimeString('pt-BR')}</p>
+            </p>
+          </div>
+            <div className="flex items-center gap-3">
             <UserCircle className="h-9 w-9 text-gray-600" />
             <div className="text-right">
               <p className="text-gray-800 font-medium">{user?.name}</p>
